@@ -84,7 +84,7 @@ class AmountRow extends StatelessWidget {
         children: [
           Expanded(child: Text(label)),
           const SizedBox(width: 8),
-          Flexible(
+          Expanded(
             child: Text(
               zar(amount),
               textAlign: TextAlign.end,

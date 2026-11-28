@@ -866,6 +866,24 @@ class _BudgetHomeState extends State<BudgetHome> {
       _Page.more => _reports(),
     };
     final theme = Theme.of(context);
+    final wide = MediaQuery.sizeOf(context).width >= 840;
+    const destinations = [
+      NavigationDestination(
+        icon: Icon(Icons.space_dashboard_outlined),
+        label: 'Overview',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.account_balance_wallet_outlined),
+        label: 'Budget',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.receipt_long_outlined),
+        label: 'Activity',
+      ),
+      NavigationDestination(icon: Icon(Icons.savings_outlined), label: 'Goals'),
+      NavigationDestination(icon: Icon(Icons.more_horiz), label: 'More'),
+    ];
+    void selectDestination(int index) => _pageTo(_Page.values[index]);
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -889,44 +907,66 @@ class _BudgetHomeState extends State<BudgetHome> {
       ),
       body: SafeArea(
         top: false,
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: ListView(
-              key: PageStorageKey(_page),
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 92),
-              children: [
-                Text(
-                  _titles[_page]!,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
+        child: Row(
+          children: [
+            if (wide)
+              NavigationRail(
+                backgroundColor: theme.colorScheme.surface,
+                selectedIndex: _page.index,
+                labelType: NavigationRailLabelType.all,
+                scrollable: true,
+                onDestinationSelected: selectDestination,
+                destinations: [
+                  for (final destination in destinations)
+                    NavigationRailDestination(
+                      icon: destination.icon,
+                      label: Text(destination.label),
+                    ),
+                ],
+              ),
+            Expanded(
+              key: const ValueKey('budget-content'),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 720),
+                  child: ListView(
+                    key: PageStorageKey(_page),
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 92),
+                    children: [
+                      Text(
+                        _titles[_page]!,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (_page != _Page.more) ...[
+                        const SizedBox(height: 10),
+                        _monthBar(),
+                      ],
+                      if (_page != _Page.more &&
+                          widget.status.startsWith('Save failed'))
+                        TextButton(
+                          onPressed: widget.onSave,
+                          child: Text(widget.status),
+                        ),
+                      if (_page != _Page.more &&
+                          widget.status.startsWith('Cloud conflict'))
+                        TextButton(
+                          onPressed: () => _pageTo(_Page.more),
+                          child: Text(widget.status),
+                        ),
+                      for (final child in content)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: child,
+                        ),
+                    ],
                   ),
                 ),
-                if (_page != _Page.more) ...[
-                  const SizedBox(height: 10),
-                  _monthBar(),
-                ],
-                if (_page != _Page.more &&
-                    widget.status.startsWith('Save failed'))
-                  TextButton(
-                    onPressed: widget.onSave,
-                    child: Text(widget.status),
-                  ),
-                if (_page != _Page.more &&
-                    widget.status.startsWith('Cloud conflict'))
-                  TextButton(
-                    onPressed: () => _pageTo(_Page.more),
-                    child: Text(widget.status),
-                  ),
-                for (final child in content)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: child,
-                  ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
       floatingActionButton: _page == _Page.more || _page == _Page.goals
@@ -936,29 +976,13 @@ class _BudgetHomeState extends State<BudgetHome> {
               tooltip: 'Add transaction',
               child: const Icon(Icons.add),
             ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _page.index,
-        onDestinationSelected: (index) => _pageTo(_Page.values[index]),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.space_dashboard_outlined),
-            label: 'Overview',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.account_balance_wallet_outlined),
-            label: 'Budget',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            label: 'Activity',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.savings_outlined),
-            label: 'Goals',
-          ),
-          NavigationDestination(icon: Icon(Icons.more_horiz), label: 'More'),
-        ],
-      ),
+      bottomNavigationBar: wide
+          ? null
+          : NavigationBar(
+              selectedIndex: _page.index,
+              onDestinationSelected: selectDestination,
+              destinations: destinations,
+            ),
     );
   }
 }

@@ -218,6 +218,7 @@ Future<bool> editItem(BuildContext context, Json group, [Json? item]) async {
     context,
     (context) => StatefulBuilder(
       builder: (context, setState) => AlertDialog(
+        scrollable: true,
         title: Text(item == null ? 'New budget item' : 'Edit budget item'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -227,6 +228,7 @@ Future<bool> editItem(BuildContext context, Json group, [Json? item]) async {
               autofocus: true,
               decoration: const InputDecoration(labelText: 'Item name'),
             ),
+            const SizedBox(height: 12),
             TextField(
               controller: amount,
               decoration: const InputDecoration(
