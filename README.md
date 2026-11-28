@@ -2,6 +2,10 @@
 
 Private ZAR monthly budget workspace. No financial figures or personal data are committed.
 
+## Mobile app
+
+Android and iOS setup, testing and build steps are in [mobile/README.md](mobile/README.md).
+
 ## Configure Supabase
 Create a project and run the SQL migration in `supabase/migrations`. Enable email/password sign-ups and email confirmation in Authentication. Set Site URL to https://budget-studio-taupe.vercel.app and add that exact URL to the redirect allowlist. The registration screen requires a password of at least 12 characters. Never use a service-role key in this frontend.
 
